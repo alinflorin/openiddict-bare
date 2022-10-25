@@ -1,25 +1,10 @@
-using Microsoft.AspNetCore;
-using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authentication.Cookies;
-using Microsoft.IdentityModel.Tokens;
-using OpenIddictBare.Models;
-using System.Security.Claims;
-using static OpenIddict.Abstractions.OpenIddictConstants;
-using static OpenIddict.Server.OpenIddictServerEvents;
-using Microsoft.AspNetCore.Authentication.Google;
-using OpenIddict.Abstractions;
-using Microsoft.AspNetCore.Authentication.Facebook;
-using Microsoft.AspNetCore.Authentication.MicrosoftAccount;
-using AspNet.Security.OAuth.GitHub;
-using Microsoft.Extensions.Options;
+using Microsoft.EntityFrameworkCore;
+using OpenIddictBare;
 
 var builder = WebApplication.CreateBuilder(args);
 
-var idpClients = builder.Configuration.GetSection("Clients").Get<IEnumerable<IdpClient>>();
-if (idpClients == null)
-{
-    throw new Exception("No clients have been configured!");
-}
+
 
 builder.Services.AddControllers();
 
@@ -78,82 +63,48 @@ if (builder.Configuration["GitHub:ClientId"] != null && builder.Configuration["G
     });
 }
 
+builder.Services.AddDbContext<DbContext>(options =>
+{
+    // Configure the context to use an in-memory store.
+    options.UseInMemoryDatabase(nameof(DbContext));
+
+    // Register the entity sets needed by OpenIddict.
+    options.UseOpenIddict();
+});
+
 builder.Services.AddOpenIddict()
+    .AddCore(options =>
+    {
+        // Configure OpenIddict to use the EF Core stores/models.
+        options.UseEntityFrameworkCore()
+            .UseDbContext<DbContext>();
+    })
     .AddServer(options =>
     {
-        options
-                .AddDevelopmentEncryptionCertificate()
-                .AddDevelopmentSigningCertificate();
-        options.AllowAuthorizationCodeFlow();
+        options.AddEphemeralEncryptionKey().AddEphemeralSigningKey();
+        options.AllowAuthorizationCodeFlow().RequireProofKeyForCodeExchange();
         options.SetAuthorizationEndpointUris("/connect/authorize")
+                .SetUserinfoEndpointUris("/connect/userinfo")
                .SetTokenEndpointUris("/connect/token");
-        options.EnableDegradedMode();
         options.AllowClientCredentialsFlow();
+        options.AllowRefreshTokenFlow();
         options.DisableAccessTokenEncryption();
         options.AllowRefreshTokenFlow();
-        options.AllowImplicitFlow();
         options.UseAspNetCore()
         .EnableTokenEndpointPassthrough()
+        .EnableUserinfoEndpointPassthrough()
         .EnableAuthorizationEndpointPassthrough()
         .DisableTransportSecurityRequirement();
 
+        options.SetAccessTokenLifetime(TimeSpan.FromMinutes(builder.Configuration.GetValue<int>("AccessTokenLifetimeMinutes")));
+        options.SetIdentityTokenLifetime(TimeSpan.FromMinutes(builder.Configuration.GetValue<int>("IdentityTokenLifetimeMinutes")));
+        options.SetRefreshTokenLifetime(TimeSpan.FromMinutes(builder.Configuration.GetValue<int>("RefreshTokenLifetimeMinutes")));
 
-        options.AddEventHandler<ValidateAuthorizationRequestContext>(builder =>
-            builder.UseInlineHandler(context =>
-            {
-                if (!idpClients.Any(idpc => string.Equals(context.ClientId, idpc.ClientId, StringComparison.Ordinal)))
-                {
-                    context.Reject(
-                        error: Errors.InvalidClient,
-                        description: "The specified 'client_id' doesn't match a registered application.");
-                    return default;
-                }
-                
-                if (context.RedirectUri == null || !idpClients.Any(idpc => idpc.RedirectUrls != null && idpc.RedirectUrls.Any(ru => string.Equals(ru, context.RedirectUri))))
-                {
-                    context.Reject(
-                        error: Errors.InvalidClient,
-                        description: "The specified 'redirect_uri' is not valid for this client application.");
-                    return default;
-                }
-                return default;
-            }));
-        options.AddEventHandler<ValidateTokenRequestContext>(builder =>
-            builder.UseInlineHandler(context =>
-            {
-                if (!idpClients.Any(idpc => string.Equals(context.ClientId, idpc.ClientId, StringComparison.Ordinal)))
-                {
-                    context.Reject(
-                        error: Errors.InvalidClient,
-                        description: "The specified 'client_id' doesn't match a registered application.");
-                    return default;
-                }
-
-                if (context.Request.GrantType == "client_credentials")
-                {
-
-                    if (!idpClients.Any(idpc => string.Equals(context.ClientSecret, idpc.ClientSecret, StringComparison.Ordinal)))
-                    {
-                        context.Reject(
-                            error: Errors.InvalidClient,
-                            description: "The specified 'client_secret' doesn't match a registered application.");
-                        return default;
-                    }
-                }
-
-                return default;
-            }));
-
-    })
-    .AddValidation(options =>
-    {
-        options.UseLocalServer(x => {
-        
-        });
-        options.UseAspNetCore(x => { 
-            
-        });
+        options.RegisterScopes(builder.Configuration.GetSection("Scopes").Get<string[]>());
     });
+
+builder.Services.AddHostedService<OpenIddictHostedService>();
+
 
 var app = builder.Build();
 
