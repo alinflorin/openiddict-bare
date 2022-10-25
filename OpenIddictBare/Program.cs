@@ -89,9 +89,10 @@ builder.Services.AddOpenIddict()
                .SetTokenEndpointUris("/connect/token");
         options.EnableDegradedMode();
         options.AllowClientCredentialsFlow();
+        options.DisableAccessTokenEncryption();
         options.AllowRefreshTokenFlow();
         options.AllowImplicitFlow();
-        options.UseAspNetCore().EnableTokenEndpointPassthrough().DisableTransportSecurityRequirement();
+        options.UseAspNetCore().DisableTransportSecurityRequirement();
 
 
         options.AddEventHandler<ValidateAuthorizationRequestContext>(builder =>
@@ -169,9 +170,10 @@ builder.Services.AddOpenIddict()
                             return;
                         }
                         identity.AddClaim(new Claim(Claims.Subject, principal.GetClaim(ClaimTypes.NameIdentifier)));
+                        identity.AddClaim(new Claim(Claims.Email, principal.GetClaim(ClaimTypes.Email)));
                         foreach (var claim in identity.Claims)
                         {
-                            claim.SetDestinations(Destinations.AccessToken);
+                            claim.SetDestinations(Destinations.AccessToken, Destinations.IdentityToken);
                         }
                         break;
                 }
@@ -181,7 +183,7 @@ builder.Services.AddOpenIddict()
     })
     .AddValidation(options =>
     {
-        options.UseLocalServer(x => { 
+        options.UseLocalServer(x => {
         
         });
         options.UseAspNetCore(x => { 
