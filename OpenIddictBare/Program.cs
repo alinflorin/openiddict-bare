@@ -92,7 +92,10 @@ builder.Services.AddOpenIddict()
         options.DisableAccessTokenEncryption();
         options.AllowRefreshTokenFlow();
         options.AllowImplicitFlow();
-        options.UseAspNetCore().DisableTransportSecurityRequirement();
+        options.UseAspNetCore()
+        .EnableTokenEndpointPassthrough()
+        .EnableAuthorizationEndpointPassthrough()
+        .DisableTransportSecurityRequirement();
 
 
         options.AddEventHandler<ValidateAuthorizationRequestContext>(builder =>
@@ -141,45 +144,6 @@ builder.Services.AddOpenIddict()
                 return default;
             }));
 
-        options.AddEventHandler<HandleAuthorizationRequestContext>(builder =>
-        {
-            builder.UseInlineHandler(async context =>
-            {
-                if (!context.Request.HasParameter("provider") || !context.Request.GetParameter("provider").HasValue)
-                {
-                    context.SkipRequest();
-                    return;
-                }
-                var provider = context.Request.GetParameter("provider").Value.ToString();
-
-                var request = context.Transaction.GetHttpRequest() ??
-                    throw new InvalidOperationException("The ASP.NET Core request cannot be retrieved.");
-                var identity = new ClaimsIdentity(TokenValidationParameters.DefaultAuthenticationType);
-
-                switch (provider)
-                {
-                    default:
-                        context.SkipRequest();
-                        return;
-                    case "google":
-                        var principal = (await request.HttpContext.AuthenticateAsync(GoogleDefaults.AuthenticationScheme))?.Principal;
-                        if (principal == null)
-                        {
-                            await request.HttpContext.ChallengeAsync(GoogleDefaults.AuthenticationScheme);
-                            context.HandleRequest();
-                            return;
-                        }
-                        identity.AddClaim(new Claim(Claims.Subject, principal.GetClaim(ClaimTypes.NameIdentifier)));
-                        identity.AddClaim(new Claim(Claims.Email, principal.GetClaim(ClaimTypes.Email)));
-                        foreach (var claim in identity.Claims)
-                        {
-                            claim.SetDestinations(Destinations.AccessToken, Destinations.IdentityToken);
-                        }
-                        break;
-                }
-                context.Principal = new ClaimsPrincipal(identity);
-            });
-        });
     })
     .AddValidation(options =>
     {
