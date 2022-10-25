@@ -1,4 +1,5 @@
 using Microsoft.AspNetCore.Authentication.Cookies;
+using Microsoft.AspNetCore.HttpOverrides;
 using Microsoft.EntityFrameworkCore;
 using OpenIddictBare;
 
@@ -81,6 +82,7 @@ builder.Services.AddOpenIddict()
     })
     .AddServer(options =>
     {
+        options.SetIssuer(new Uri(builder.Configuration["Issuer"]));
         options.AddEphemeralEncryptionKey().AddEphemeralSigningKey();
         options.AllowAuthorizationCodeFlow().RequireProofKeyForCodeExchange();
         options.SetAuthorizationEndpointUris("/connect/authorize")
@@ -106,7 +108,13 @@ builder.Services.AddOpenIddict()
 builder.Services.AddHostedService<OpenIddictHostedService>();
 
 
+
 var app = builder.Build();
+
+app.UseForwardedHeaders(new ForwardedHeadersOptions
+{
+    ForwardedHeaders = ForwardedHeaders.XForwardedFor | ForwardedHeaders.XForwardedProto
+});
 
 app.UseRouting();
 

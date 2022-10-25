@@ -1,3 +1,64 @@
+# See http://help.github.com/ignore-files/ for more about ignoring files.
+.vscode/
+chart/
+.vs/
+buf.yaml
+telepresence.bat
+telepresence.sh
+kill-telepresence.bat
+kill-telepresence.sh
+README.md
+.git
+.gitignore
+.gitattributes
+# Compiled output
+/dist
+/tmp
+/out-tsc
+/bazel-out
+.vscode/
+chart/
+.angular/
+README.md
+.git
+.gitignore
+.gitattributes
+.angular
+# Node
+/node_modules
+npm-debug.log
+yarn-error.log
+azure-pipelines.yml
+Dockerfile
+# IDEs and editors
+.idea/
+.project
+.classpath
+.c9/
+*.launch
+.settings/
+*.sublime-workspace
+
+# Visual Studio Code
+.vscode/*
+!.vscode/settings.json
+!.vscode/tasks.json
+!.vscode/launch.json
+!.vscode/extensions.json
+.history/*
+
+# Miscellaneous
+/.angular/cache
+.sass-cache/
+/connect.lock
+/coverage
+/libpeerconnection.log
+testem.log
+/typings
+
+# System files
+.DS_Store
+Thumbs.db
 # Created by https://www.toptal.com/developers/gitignore/api/windows,linux,git,visualstudio,visualstudiocode,aspnetcore,dotnetcore
 # Edit at https://www.toptal.com/developers/gitignore?templates=windows,linux,git,visualstudio,visualstudiocode,aspnetcore,dotnetcore
 
