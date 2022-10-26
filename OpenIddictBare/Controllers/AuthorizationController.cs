@@ -81,7 +81,12 @@ namespace OpenIddictBare.Controllers
                     new[] { "google", "facebook", "microsoft", "github" },
                     url
                 );
-                return File(System.Text.Encoding.UTF8.GetBytes(html), "text/html");
+                return new ContentResult
+                {
+                    Content = html,
+                    ContentType = "text/html",
+                    StatusCode = 200
+                };
             }
             var provider = request.GetParameter("provider").Value.ToString();
 
