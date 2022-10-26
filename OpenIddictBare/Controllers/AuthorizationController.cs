@@ -27,6 +27,12 @@ namespace OpenIddictBare.Controllers
             }).ToList());
         }
 
+        [HttpGet("~/login")]
+        public async Task<IActionResult> Login([FromQuery] string returnUrl)
+        {
+            return View("");
+        }
+
         [HttpPost("~/connect/token")]
         public async Task<IActionResult> Exchange()
         {

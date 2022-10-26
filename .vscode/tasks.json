@@ -1,41 +1,84 @@
 {
     "version": "2.0.0",
     "tasks": [
-        {
-            "label": "build",
-            "command": "dotnet",
-            "type": "process",
-            "args": [
-                "build",
-                "${workspaceFolder}/OpenIddictBare/OpenIddictBare.csproj",
-                "/property:GenerateFullPaths=true",
-                "/consoleloggerparameters:NoSummary"
-            ],
-            "problemMatcher": "$msCompile"
-        },
-        {
-            "label": "publish",
-            "command": "dotnet",
-            "type": "process",
-            "args": [
-                "publish",
-                "${workspaceFolder}/OpenIddictBare/OpenIddictBare.csproj",
-                "/property:GenerateFullPaths=true",
-                "/consoleloggerparameters:NoSummary"
-            ],
-            "problemMatcher": "$msCompile"
-        },
-        {
-            "label": "watch",
-            "command": "dotnet",
-            "type": "process",
-            "args": [
-                "watch",
-                "run",
-                "--project",
-                "${workspaceFolder}/OpenIddictBare/OpenIddictBare.csproj"
-            ],
-            "problemMatcher": "$msCompile"
-        }
+      {
+        "label": "telepresence-connect",
+        "command": "telepresence",
+        "type": "process",
+        "args": ["connect"],
+        "problemMatcher": []
+      },
+      {
+        "label": "telepresence-quit",
+        "command": "telepresence",
+        "type": "process",
+        "args": ["quit"],
+        "problemMatcher": []
+      },
+      {
+        "label": "telepresence-intercept",
+        "command": "telepresence",
+        "type": "process",
+        "args": [
+          "intercept",
+          "idp",
+          "-n",
+          "idp",
+          "--port",
+          "5100:80",
+          "--env-file",
+          "${userHome}/idp.env",
+          "--http-header",
+          "all"
+        ],
+        "problemMatcher": []
+      },
+      {
+        "label": "telepresence-kill",
+        "command": "telepresence",
+        "type": "process",
+        "args": ["leave", "idp-idp"],
+        "problemMatcher": []
+      },
+      {
+        "label": "telepresence-connect-kill-intercept",
+        "dependsOn": [
+          "telepresence-connect",
+          "telepresence-kill",
+          "telepresence-intercept"
+        ],
+        "dependsOrder": "sequence",
+        "problemMatcher": []
+      },
+      {
+        "label": "build",
+        "command": "dotnet",
+        "type": "process",
+        "dependsOn": [
+          "telepresence-connect",
+          "telepresence-kill",
+          "telepresence-intercept"
+        ],
+        "dependsOrder": "sequence",
+        "args": [
+          "build",
+          "${workspaceFolder}/OpenIddictBare/OpenIddictBare.csproj",
+          "/property:GenerateFullPaths=true",
+          "/consoleloggerparameters:NoSummary"
+        ],
+        "problemMatcher": "$msCompile"
+      },
+      {
+        "label": "publish",
+        "command": "dotnet",
+        "type": "process",
+        "args": [
+          "publish",
+          "${workspaceFolder}/OpenIddictBare/OpenIddictBare.csproj",
+          "/property:GenerateFullPaths=true",
+          "/consoleloggerparameters:NoSummary"
+        ],
+        "problemMatcher": "$msCompile"
+      }
     ]
 }
