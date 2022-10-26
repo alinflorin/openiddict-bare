@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore;
+﻿using System.Security.Claims;
+using Microsoft.AspNetCore;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Authentication.Facebook;
@@ -9,7 +10,7 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using OpenIddict.Abstractions;
 using OpenIddict.Server.AspNetCore;
-using System.Security.Claims;
+using OpenIddictBare.Models;
 
 namespace OpenIddictBare.Controllers
 {
@@ -23,14 +24,8 @@ namespace OpenIddictBare.Controllers
 
             return Ok(claimsPrincipal.Claims.Select(x => new { 
                 Key = x.Type,
-                Value = x.Value
+                x.Value
             }).ToList());
-        }
-
-        [HttpGet("~/login")]
-        public async Task<IActionResult> Login([FromQuery] string returnUrl)
-        {
-            return View("");
         }
 
         [HttpPost("~/connect/token")]
@@ -80,7 +75,15 @@ namespace OpenIddictBare.Controllers
 
             if (!request.HasParameter("provider") || !request.GetParameter("provider").HasValue)
             {
-                throw new InvalidOperationException("Invalid provider.");
+                Response.ContentType = "text/html";
+                var location = new Uri($"{Request.Scheme}://{Request.Host}{Request.Path}{Request.QueryString}");
+                var url = location.AbsoluteUri;
+                var html = Templates.RenderTemplate(
+                    new[] { "google", "facebook", "microsoft", "github" },
+                    url
+                );
+                await Response.WriteAsync(html);
+                return Ok();
             }
             var provider = request.GetParameter("provider").Value.ToString();
 

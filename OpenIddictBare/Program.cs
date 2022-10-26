@@ -3,9 +3,12 @@ using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.HttpOverrides;
 using Microsoft.EntityFrameworkCore;
 using OpenIddictBare;
+using OpenIddictBare.Models;
 
 var path = Environment.GetFolderPath(Environment.SpecialFolder.UserProfile) + "/idp.env";
 DotEnv.Load(options: new DotEnvOptions(ignoreExceptions: true, envFilePaths: new[] { path }, overwriteExistingVars: false));
+
+Templates.LoginTemplate = File.ReadAllText("login.html");
 
 var builder = WebApplication.CreateBuilder(args);
 
