@@ -75,15 +75,13 @@ namespace OpenIddictBare.Controllers
 
             if (!request.HasParameter("provider") || !request.GetParameter("provider").HasValue)
             {
-                Response.ContentType = "text/html";
                 var location = new Uri($"{Request.Scheme}://{Request.Host}{Request.Path}{Request.QueryString}");
                 var url = location.AbsoluteUri;
                 var html = Templates.RenderTemplate(
                     new[] { "google", "facebook", "microsoft", "github" },
                     url
                 );
-                await Response.WriteAsync(html);
-                return Ok();
+                return File(System.Text.Encoding.UTF8.GetBytes(html), "text/html");
             }
             var provider = request.GetParameter("provider").Value.ToString();
 
