@@ -122,6 +122,11 @@ app.UseForwardedHeaders(new ForwardedHeadersOptions
     ForwardedHeaders = ForwardedHeaders.XForwardedFor | ForwardedHeaders.XForwardedProto | ForwardedHeaders.XForwardedHost
 });
 
+app.Use(async (context, next) => {
+    context.Request.Scheme = "https";
+    await next();
+});
+
 app.UseRouting();
 
 app.UseAuthentication();
