@@ -117,10 +117,14 @@ builder.Services.AddHostedService<OpenIddictHostedService>();
 
 var app = builder.Build();
 
-app.UseForwardedHeaders(new ForwardedHeadersOptions
+var forwardingOptions = new ForwardedHeadersOptions()
 {
-    ForwardedHeaders = ForwardedHeaders.XForwardedFor | ForwardedHeaders.XForwardedProto | ForwardedHeaders.XForwardedHost
-});
+    ForwardedHeaders = ForwardedHeaders.XForwardedFor | ForwardedHeaders.XForwardedProto
+};
+forwardingOptions.KnownNetworks.Clear();
+forwardingOptions.KnownProxies.Clear();
+
+app.UseForwardedHeaders(forwardingOptions);
 
 app.Use(async (context, next) => {
     context.Request.Scheme = "https";
