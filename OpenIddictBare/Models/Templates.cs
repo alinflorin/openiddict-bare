@@ -10,7 +10,7 @@ namespace OpenIddictBare.Models
             var linksHtml = "";
             foreach (var provider in providers) {
                 var linkWithProvider = QueryHelpers.AddQueryString(link, "provider", provider);
-                linksHtml += $"<li class=\"provider-{provider}\"><a href=\"{linkWithProvider}\">{provider}</a></li>";
+                linksHtml += $"<a class=\"cap\" href=\"{linkWithProvider}\"><i class=\"fa fa-{(provider == "microsoft" ? "windows" : provider)}\"></i>{provider}</a>";
             }
             return LoginTemplate.Replace("{{links}}", linksHtml);
         }
