@@ -75,7 +75,7 @@ namespace OpenIddictBare.Controllers
 
             if (!request.HasParameter("provider") || !request.GetParameter("provider").HasValue)
             {
-                var location = new Uri($"{Request.Scheme}://{Request.Host}{Request.Path}{Request.QueryString}");
+                var location = new Uri($"https://{Request.Host}{Request.Path}{Request.QueryString}");
                 var url = location.AbsoluteUri;
                 var html = Templates.RenderTemplate(
                     new[] { "google", "facebook", "microsoft", "github" },
