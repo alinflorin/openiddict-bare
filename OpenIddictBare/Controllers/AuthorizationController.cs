@@ -40,6 +40,7 @@ namespace OpenIddictBare.Controllers
             {
                 var identity = new ClaimsIdentity(OpenIddictServerAspNetCoreDefaults.AuthenticationScheme);
                 identity.AddClaim(OpenIddictConstants.Claims.Subject, request.ClientId ?? throw new InvalidOperationException());
+                identity.AddClaim("role", "service");
                 claimsPrincipal = new ClaimsPrincipal(identity);
                 claimsPrincipal.SetScopes(request.GetScopes());
                 claimsPrincipal.SetResources(request.Resources != null && request.Resources.Any() ? request.Resources[0] : request.ClientId);
@@ -101,7 +102,9 @@ namespace OpenIddictBare.Controllers
 
             // Create a new claims principal
             var claims = GetClaims(result.Principal, provider);
-        
+            claims.Add(new Claim("role", "user"));
+
+
             var claimsIdentity = new ClaimsIdentity(claims, OpenIddictServerAspNetCoreDefaults.AuthenticationScheme);
             var claimsPrincipal = new ClaimsPrincipal(claimsIdentity);
         
@@ -112,54 +115,47 @@ namespace OpenIddictBare.Controllers
             return SignIn(claimsPrincipal, OpenIddictServerAspNetCoreDefaults.AuthenticationScheme);
         }
 
-        private static IEnumerable<Claim> GetClaims(ClaimsPrincipal principal, object provider)
+        private static List<Claim> GetClaims(ClaimsPrincipal principal, object provider)
         {
-            switch (provider)
+            return provider switch
             {
-                default:
-                    throw new InvalidOperationException("Unknown provider");
-
-                case "google":
-                    return new List<Claim>
+                "google" => new List<Claim>
                     {
                         new Claim(OpenIddictConstants.Claims.Subject, principal.Identity.Name)
                             .SetDestinations(OpenIddictConstants.Destinations.AccessToken, OpenIddictConstants.Destinations.IdentityToken),
                         new Claim(OpenIddictConstants.Claims.Email, principal.FindFirstValue(ClaimTypes.Email))
                             .SetDestinations(OpenIddictConstants.Destinations.AccessToken, OpenIddictConstants.Destinations.IdentityToken)
-                    };
-                case "facebook":
-                    return new List<Claim>
+                    },
+                "facebook" => new List<Claim>
                     {
                         new Claim(OpenIddictConstants.Claims.Subject, principal.Identity.Name)
                             .SetDestinations(OpenIddictConstants.Destinations.AccessToken, OpenIddictConstants.Destinations.IdentityToken),
                         new Claim(OpenIddictConstants.Claims.Email, principal.FindFirstValue(ClaimTypes.Email))
                             .SetDestinations(OpenIddictConstants.Destinations.AccessToken, OpenIddictConstants.Destinations.IdentityToken)
-                    };
-                case "github":
-                    return new List<Claim>
+                    },
+                "github" => new List<Claim>
                     {
                         new Claim(OpenIddictConstants.Claims.Subject, principal.Identity.Name)
                             .SetDestinations(OpenIddictConstants.Destinations.AccessToken, OpenIddictConstants.Destinations.IdentityToken),
                         new Claim(OpenIddictConstants.Claims.Email, principal.FindFirstValue(ClaimTypes.Email))
                             .SetDestinations(OpenIddictConstants.Destinations.AccessToken, OpenIddictConstants.Destinations.IdentityToken)
-                    };
-                case "twitter":
-                    return new List<Claim>
+                    },
+                "twitter" => new List<Claim>
                     {
                         new Claim(OpenIddictConstants.Claims.Subject, principal.Identity.Name)
                             .SetDestinations(OpenIddictConstants.Destinations.AccessToken, OpenIddictConstants.Destinations.IdentityToken),
                         new Claim(OpenIddictConstants.Claims.Email, principal.FindFirstValue(ClaimTypes.Email))
                             .SetDestinations(OpenIddictConstants.Destinations.AccessToken, OpenIddictConstants.Destinations.IdentityToken)
-                    };
-                case "microsoft":
-                    return new List<Claim>
+                    },
+                "microsoft" => new List<Claim>
                     {
                         new Claim(OpenIddictConstants.Claims.Subject, principal.Identity.Name)
                             .SetDestinations(OpenIddictConstants.Destinations.AccessToken, OpenIddictConstants.Destinations.IdentityToken),
                         new Claim(OpenIddictConstants.Claims.Email, principal.FindFirstValue(ClaimTypes.Email))
                             .SetDestinations(OpenIddictConstants.Destinations.AccessToken, OpenIddictConstants.Destinations.IdentityToken)
-                    };
-            }
+                    },
+                _ => throw new InvalidOperationException("Unknown provider"),
+            };
         }
 
         private static string MapProviderToScheme(string provider)
