@@ -45,6 +45,7 @@ namespace OpenIddictBare.Controllers
                 claimsPrincipal = new ClaimsPrincipal(identity);
 
                 claimsPrincipal.SetScopes(request.GetScopes());
+                claimsPrincipal.SetResources(request.ClientId);
             }
 
             else if (request.IsAuthorizationCodeGrantType())
