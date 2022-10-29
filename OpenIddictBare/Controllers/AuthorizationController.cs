@@ -39,13 +39,10 @@ namespace OpenIddictBare.Controllers
             if (request.IsClientCredentialsGrantType())
             {
                 var identity = new ClaimsIdentity(OpenIddictServerAspNetCoreDefaults.AuthenticationScheme);
-
                 identity.AddClaim(OpenIddictConstants.Claims.Subject, request.ClientId ?? throw new InvalidOperationException());
-
                 claimsPrincipal = new ClaimsPrincipal(identity);
-
                 claimsPrincipal.SetScopes(request.GetScopes());
-                claimsPrincipal.SetResources(request.ClientId);
+                claimsPrincipal.SetResources(request.Resources != null && request.Resources.Any() ? request.Resources[0] : request.ClientId);
             }
 
             else if (request.IsAuthorizationCodeGrantType())
