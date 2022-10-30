@@ -40,7 +40,6 @@ namespace OpenIddictBare.Controllers
             {
                 var identity = new ClaimsIdentity(OpenIddictServerAspNetCoreDefaults.AuthenticationScheme);
                 identity.AddClaim(OpenIddictConstants.Claims.Subject, request.ClientId ?? throw new InvalidOperationException());
-                identity.AddClaim("role", "service");
                 claimsPrincipal = new ClaimsPrincipal(identity);
                 claimsPrincipal.SetScopes(request.GetScopes());
                 claimsPrincipal.SetResources(request.Resources != null && request.Resources.Any() ? request.Resources[0] : request.ClientId);
@@ -102,7 +101,6 @@ namespace OpenIddictBare.Controllers
 
             // Create a new claims principal
             var claims = GetClaims(result.Principal, provider);
-            claims.Add(new Claim("role", "user"));
 
 
             var claimsIdentity = new ClaimsIdentity(claims, OpenIddictServerAspNetCoreDefaults.AuthenticationScheme);
