@@ -18,6 +18,13 @@
 		<PackageReference Include="OpenIddict.AspNetCore" Version="3.1.1" />
 		<PackageReference Include="OpenIddict.EntityFrameworkCore" Version="3.1.1" />
 		<PackageReference Include="dotenv.net" Version="3.1.1" />
+		<PackageReference Include="OpenTelemetry.Exporter.Console" Version="1.4.0-beta.1" />
+		<PackageReference Include="OpenTelemetry.Exporter.Zipkin" Version="1.4.0-beta.1" />
+		<PackageReference Include="OpenTelemetry.Extensions.Hosting" Version="1.0.0-rc9.7" />
+		<PackageReference Include="OpenTelemetry.Extensions.Propagators" Version="1.4.0-beta.2" />
+		<PackageReference Include="OpenTelemetry.Instrumentation.AspNetCore" Version="1.0.0-rc9.7" />
+		<PackageReference Include="OpenTelemetry.Instrumentation.GrpcNetClient" Version="1.0.0-rc9.7" />
+		<PackageReference Include="OpenTelemetry.Instrumentation.Http" Version="1.0.0-rc9.7" />
 	</ItemGroup>
 
 	<ItemGroup>

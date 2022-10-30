@@ -4,6 +4,9 @@ using Microsoft.AspNetCore.HttpOverrides;
 using Microsoft.EntityFrameworkCore;
 using OpenIddictBare;
 using OpenIddictBare.Models;
+using OpenTelemetry;
+using OpenTelemetry.Resources;
+using OpenTelemetry.Trace;
 
 var path = Environment.GetFolderPath(Environment.SpecialFolder.UserProfile) + "/idp.env";
 DotEnv.Load(options: new DotEnvOptions(ignoreExceptions: true, envFilePaths: new[] { path }, overwriteExistingVars: false));
@@ -113,7 +116,33 @@ builder.Services.AddOpenIddict()
 
 builder.Services.AddHostedService<OpenIddictHostedService>();
 
+if (builder.Configuration.GetValue("OpenTelemetry:Enabled", false))
+{
+    builder.Services.AddOpenTelemetryTracing(x =>
+    {
+        var provider = x.AddAspNetCoreInstrumentation()
+            .AddSource(nameof(OpenIddictBare).ToLower())
+            .AddGrpcClientInstrumentation()
+            .AddHttpClientInstrumentation()
+            .SetSampler<AlwaysOnSampler>()
+            .SetResourceBuilder(ResourceBuilder.CreateDefault().AddService(nameof(OpenIddictBare).ToLower()));
 
+        if (builder.Configuration.GetValue("OpenTelemetry:ZipkinExporterEnabled", false))
+        {
+            provider.AddZipkinExporter(zo =>
+            {
+                zo.Endpoint = new Uri(builder.Configuration["OpenTelemetry:ZipkinEndpoint"]);
+            });
+        }
+
+        if (builder.Configuration.GetValue("OpenTelemetry:ConsoleExporterEnabled", false))
+        {
+            provider.AddConsoleExporter();
+        }
+
+        Sdk.SetDefaultTextMapPropagator(new OpenTelemetry.Extensions.Propagators.B3Propagator(false));
+    });
+}
 
 var app = builder.Build();
 
