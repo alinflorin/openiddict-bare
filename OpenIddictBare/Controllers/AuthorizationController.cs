@@ -73,6 +73,7 @@ namespace OpenIddictBare.Controllers
 
             if (!request.HasParameter("provider") || !request.GetParameter("provider").HasValue)
             {
+                await HttpContext.SignOutAsync(CookieAuthenticationDefaults.AuthenticationScheme);
                 var location = new Uri($"{Request.Scheme}://{Request.Host}{Request.Path}{Request.QueryString}");
                 var url = location.AbsoluteUri;
                 var html = Templates.RenderTemplate(
