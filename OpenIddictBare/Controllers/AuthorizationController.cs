@@ -73,7 +73,7 @@ namespace OpenIddictBare.Controllers
 
             if (!request.HasParameter("provider") || !request.GetParameter("provider").HasValue)
             {
-                await HttpContext.SignOutAsync(CookieAuthenticationDefaults.AuthenticationScheme);
+                // await HttpContext.SignOutAsync(CookieAuthenticationDefaults.AuthenticationScheme);
                 var location = new Uri($"{Request.Scheme}://{Request.Host}{Request.Path}{Request.QueryString}");
                 var url = location.AbsoluteUri;
                 var html = Templates.RenderTemplate(
@@ -88,12 +88,15 @@ namespace OpenIddictBare.Controllers
                 };
             }
             var provider = request.GetParameter("provider").Value.ToString();
+            
 
             // Retrieve the user principal stored in the authentication cookie.
             var result = await HttpContext.AuthenticateAsync(CookieAuthenticationDefaults.AuthenticationScheme);
+
+
         
             // If the user principal can't be extracted, redirect the user to the login page.
-            if (!result.Succeeded)
+            if (!result.Succeeded || result.Principal.Identity.AuthenticationType.ToLower() != provider)
             {
                 return Challenge(
                     authenticationSchemes: new[] { MapProviderToScheme(provider) });
