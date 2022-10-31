@@ -48,8 +48,6 @@ namespace OpenIddictBare.Controllers
             else if (request.IsAuthorizationCodeGrantType())
             {
                 claimsPrincipal = (await HttpContext.AuthenticateAsync(OpenIddictServerAspNetCoreDefaults.AuthenticationScheme)).Principal;
-                claimsPrincipal.SetScopes(request.GetScopes());
-                claimsPrincipal.SetResources(request.Resources != null && request.Resources.Any() ? request.Resources[0] : request.ClientId);
             }
 
             else if (request.IsRefreshTokenGrantType())
