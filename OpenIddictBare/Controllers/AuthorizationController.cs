@@ -48,11 +48,12 @@ namespace OpenIddictBare.Controllers
             else if (request.IsAuthorizationCodeGrantType())
             {
                 claimsPrincipal = (await HttpContext.AuthenticateAsync(OpenIddictServerAspNetCoreDefaults.AuthenticationScheme)).Principal;
+                claimsPrincipal.SetScopes(request.GetScopes());
+                claimsPrincipal.SetResources(request.Resources != null && request.Resources.Any() ? request.Resources[0] : request.ClientId);
             }
 
             else if (request.IsRefreshTokenGrantType())
             {
-                // Retrieve the claims principal stored in the refresh token.
                 claimsPrincipal = (await HttpContext.AuthenticateAsync(OpenIddictServerAspNetCoreDefaults.AuthenticationScheme)).Principal;
             }
             else
@@ -123,37 +124,37 @@ namespace OpenIddictBare.Controllers
             {
                 "google" => new List<Claim>
                     {
-                        new Claim(OpenIddictConstants.Claims.Subject, principal.Identity.Name)
+                        new Claim(OpenIddictConstants.Claims.Name, principal.Identity.Name)
                             .SetDestinations(OpenIddictConstants.Destinations.AccessToken, OpenIddictConstants.Destinations.IdentityToken),
-                        new Claim(OpenIddictConstants.Claims.Email, principal.FindFirstValue(ClaimTypes.Email))
+                        new Claim(OpenIddictConstants.Claims.Subject, principal.FindFirstValue(ClaimTypes.Email))
                             .SetDestinations(OpenIddictConstants.Destinations.AccessToken, OpenIddictConstants.Destinations.IdentityToken)
                     },
                 "facebook" => new List<Claim>
                     {
-                        new Claim(OpenIddictConstants.Claims.Subject, principal.Identity.Name)
+                        new Claim(OpenIddictConstants.Claims.Name, principal.Identity.Name)
                             .SetDestinations(OpenIddictConstants.Destinations.AccessToken, OpenIddictConstants.Destinations.IdentityToken),
-                        new Claim(OpenIddictConstants.Claims.Email, principal.FindFirstValue(ClaimTypes.Email))
+                        new Claim(OpenIddictConstants.Claims.Subject, principal.FindFirstValue(ClaimTypes.Email))
                             .SetDestinations(OpenIddictConstants.Destinations.AccessToken, OpenIddictConstants.Destinations.IdentityToken)
                     },
                 "github" => new List<Claim>
                     {
-                        new Claim(OpenIddictConstants.Claims.Subject, principal.Identity.Name)
+                        new Claim(OpenIddictConstants.Claims.Name, principal.Identity.Name)
                             .SetDestinations(OpenIddictConstants.Destinations.AccessToken, OpenIddictConstants.Destinations.IdentityToken),
-                        new Claim(OpenIddictConstants.Claims.Email, principal.FindFirstValue(ClaimTypes.Email))
+                        new Claim(OpenIddictConstants.Claims.Subject, principal.FindFirstValue(ClaimTypes.Email))
                             .SetDestinations(OpenIddictConstants.Destinations.AccessToken, OpenIddictConstants.Destinations.IdentityToken)
                     },
                 "twitter" => new List<Claim>
                     {
-                        new Claim(OpenIddictConstants.Claims.Subject, principal.Identity.Name)
+                        new Claim(OpenIddictConstants.Claims.Name, principal.Identity.Name)
                             .SetDestinations(OpenIddictConstants.Destinations.AccessToken, OpenIddictConstants.Destinations.IdentityToken),
-                        new Claim(OpenIddictConstants.Claims.Email, principal.FindFirstValue(ClaimTypes.Email))
+                        new Claim(OpenIddictConstants.Claims.Subject, principal.FindFirstValue(ClaimTypes.Email))
                             .SetDestinations(OpenIddictConstants.Destinations.AccessToken, OpenIddictConstants.Destinations.IdentityToken)
                     },
                 "microsoft" => new List<Claim>
                     {
-                        new Claim(OpenIddictConstants.Claims.Subject, principal.Identity.Name)
+                        new Claim(OpenIddictConstants.Claims.Name, principal.Identity.Name)
                             .SetDestinations(OpenIddictConstants.Destinations.AccessToken, OpenIddictConstants.Destinations.IdentityToken),
-                        new Claim(OpenIddictConstants.Claims.Email, principal.FindFirstValue(ClaimTypes.Email))
+                        new Claim(OpenIddictConstants.Claims.Subject, principal.FindFirstValue(ClaimTypes.Email))
                             .SetDestinations(OpenIddictConstants.Destinations.AccessToken, OpenIddictConstants.Destinations.IdentityToken)
                     },
                 _ => throw new InvalidOperationException("Unknown provider"),
@@ -162,21 +163,15 @@ namespace OpenIddictBare.Controllers
 
         private static string MapProviderToScheme(string provider)
         {
-            switch (provider)
+            return provider switch
             {
-                default:
-                    throw new InvalidOperationException("Unknown provider");
-                case "google":
-                    return GoogleDefaults.AuthenticationScheme;
-                case "facebook":
-                    return FacebookDefaults.AuthenticationScheme;
-                case "github":
-                    return "GitHub";
-                case "twitter":
-                    return TwitterDefaults.AuthenticationScheme;
-                case "microsoft":
-                    return MicrosoftAccountDefaults.AuthenticationScheme;
-            }
+                "google" => GoogleDefaults.AuthenticationScheme,
+                "facebook" => FacebookDefaults.AuthenticationScheme,
+                "github" => "GitHub",
+                "twitter" => TwitterDefaults.AuthenticationScheme,
+                "microsoft" => MicrosoftAccountDefaults.AuthenticationScheme,
+                _ => throw new InvalidOperationException("Unknown provider"),
+            };
         }
     }
 }
