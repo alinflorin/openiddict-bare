@@ -151,7 +151,6 @@ app.UseCors(o => {
     o.AllowAnyHeader();
     o.AllowAnyMethod();
     o.AllowAnyOrigin();
-    o.AllowCredentials();
 });
 
 var forwardingOptions = new ForwardedHeadersOptions()
