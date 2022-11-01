@@ -22,11 +22,11 @@ namespace OpenIddictBare.Controllers
         {
             var claimsPrincipal = (await HttpContext.AuthenticateAsync(OpenIddictServerAspNetCoreDefaults.AuthenticationScheme)).Principal;
 
-            return Ok(claimsPrincipal.Claims.Select(x => new
-            {
-                Key = x.Type,
-                x.Value
-            }).ToList());
+            return Ok(new {
+                Name = claimsPrincipal.FindFirstValue(ClaimTypes.Name),
+                Email = claimsPrincipal.FindFirstValue(ClaimTypes.Email),
+                Sub = claimsPrincipal.FindFirstValue(ClaimTypes.Email)
+            });
         }
 
         [HttpPost("~/connect/token")]
