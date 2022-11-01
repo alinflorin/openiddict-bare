@@ -22,10 +22,12 @@ namespace OpenIddictBare.Controllers
         {
             var claimsPrincipal = (await HttpContext.AuthenticateAsync(OpenIddictServerAspNetCoreDefaults.AuthenticationScheme)).Principal;
 
-            return Ok(new {
+            return Ok(new
+            {
                 Name = claimsPrincipal.FindFirstValue(OpenIddictConstants.Claims.Name),
                 Email = claimsPrincipal.FindFirstValue(OpenIddictConstants.Claims.Email),
-                Sub = claimsPrincipal.FindFirstValue(OpenIddictConstants.Claims.Email)
+                Sub = claimsPrincipal.FindFirstValue(OpenIddictConstants.Claims.Email),
+                Prv = claimsPrincipal.FindFirstValue("prv")
             });
         }
 
@@ -41,6 +43,7 @@ namespace OpenIddictBare.Controllers
             {
                 var identity = new ClaimsIdentity(OpenIddictServerAspNetCoreDefaults.AuthenticationScheme);
                 identity.AddClaim(OpenIddictConstants.Claims.Subject, request.ClientId ?? throw new InvalidOperationException());
+                identity.AddClaim("prv", "idp");
                 claimsPrincipal = new ClaimsPrincipal(identity);
                 claimsPrincipal.SetScopes(request.GetScopes());
                 claimsPrincipal.SetResources(request.Resources != null && request.Resources.Any() ? request.Resources[0] : request.ClientId);
@@ -77,7 +80,7 @@ namespace OpenIddictBare.Controllers
                 var location = new Uri($"{Request.Scheme}://{Request.Host}{Request.Path}{Request.QueryString}");
                 var url = location.AbsoluteUri;
                 var html = Templates.RenderTemplate(
-                    new[] { "google", "facebook", "microsoft", "github" },
+                    new[] { "google", "facebook", "microsoft", "github", "twitter" },
                     url
                 );
                 return new ContentResult
@@ -127,7 +130,9 @@ namespace OpenIddictBare.Controllers
                             .SetDestinations(OpenIddictConstants.Destinations.AccessToken, OpenIddictConstants.Destinations.IdentityToken),
                         new Claim(OpenIddictConstants.Claims.Subject, principal.FindFirstValue(ClaimTypes.Email))
                             .SetDestinations(OpenIddictConstants.Destinations.AccessToken, OpenIddictConstants.Destinations.IdentityToken),
-                            new Claim(OpenIddictConstants.Claims.Email, principal.FindFirstValue(ClaimTypes.Email))
+                        new Claim(OpenIddictConstants.Claims.Email, principal.FindFirstValue(ClaimTypes.Email))
+                            .SetDestinations(OpenIddictConstants.Destinations.AccessToken, OpenIddictConstants.Destinations.IdentityToken),
+                            new Claim("prv", "google")
                             .SetDestinations(OpenIddictConstants.Destinations.AccessToken, OpenIddictConstants.Destinations.IdentityToken)
                     },
                 "facebook" => new List<Claim>
@@ -136,7 +141,9 @@ namespace OpenIddictBare.Controllers
                             .SetDestinations(OpenIddictConstants.Destinations.AccessToken, OpenIddictConstants.Destinations.IdentityToken),
                         new Claim(OpenIddictConstants.Claims.Subject, principal.FindFirstValue(ClaimTypes.Email))
                             .SetDestinations(OpenIddictConstants.Destinations.AccessToken, OpenIddictConstants.Destinations.IdentityToken),
-                            new Claim(OpenIddictConstants.Claims.Email, principal.FindFirstValue(ClaimTypes.Email))
+                        new Claim(OpenIddictConstants.Claims.Email, principal.FindFirstValue(ClaimTypes.Email))
+                            .SetDestinations(OpenIddictConstants.Destinations.AccessToken, OpenIddictConstants.Destinations.IdentityToken),
+                        new Claim("prv", "facebook")
                             .SetDestinations(OpenIddictConstants.Destinations.AccessToken, OpenIddictConstants.Destinations.IdentityToken)
                     },
                 "github" => new List<Claim>
@@ -145,7 +152,9 @@ namespace OpenIddictBare.Controllers
                             .SetDestinations(OpenIddictConstants.Destinations.AccessToken, OpenIddictConstants.Destinations.IdentityToken),
                         new Claim(OpenIddictConstants.Claims.Subject, principal.FindFirstValue(ClaimTypes.Email))
                             .SetDestinations(OpenIddictConstants.Destinations.AccessToken, OpenIddictConstants.Destinations.IdentityToken),
-                            new Claim(OpenIddictConstants.Claims.Email, principal.FindFirstValue(ClaimTypes.Email))
+                        new Claim(OpenIddictConstants.Claims.Email, principal.FindFirstValue(ClaimTypes.Email))
+                            .SetDestinations(OpenIddictConstants.Destinations.AccessToken, OpenIddictConstants.Destinations.IdentityToken),
+                        new Claim("prv", "github")
                             .SetDestinations(OpenIddictConstants.Destinations.AccessToken, OpenIddictConstants.Destinations.IdentityToken)
                     },
                 "twitter" => new List<Claim>
@@ -154,7 +163,9 @@ namespace OpenIddictBare.Controllers
                             .SetDestinations(OpenIddictConstants.Destinations.AccessToken, OpenIddictConstants.Destinations.IdentityToken),
                         new Claim(OpenIddictConstants.Claims.Subject, principal.FindFirstValue(ClaimTypes.Email))
                             .SetDestinations(OpenIddictConstants.Destinations.AccessToken, OpenIddictConstants.Destinations.IdentityToken),
-                            new Claim(OpenIddictConstants.Claims.Email, principal.FindFirstValue(ClaimTypes.Email))
+                        new Claim(OpenIddictConstants.Claims.Email, principal.FindFirstValue(ClaimTypes.Email))
+                            .SetDestinations(OpenIddictConstants.Destinations.AccessToken, OpenIddictConstants.Destinations.IdentityToken),
+                        new Claim("prv", "twitter")
                             .SetDestinations(OpenIddictConstants.Destinations.AccessToken, OpenIddictConstants.Destinations.IdentityToken)
                     },
                 "microsoft" => new List<Claim>
@@ -163,7 +174,9 @@ namespace OpenIddictBare.Controllers
                             .SetDestinations(OpenIddictConstants.Destinations.AccessToken, OpenIddictConstants.Destinations.IdentityToken),
                         new Claim(OpenIddictConstants.Claims.Subject, principal.FindFirstValue(ClaimTypes.Email))
                             .SetDestinations(OpenIddictConstants.Destinations.AccessToken, OpenIddictConstants.Destinations.IdentityToken),
-                            new Claim(OpenIddictConstants.Claims.Email, principal.FindFirstValue(ClaimTypes.Email))
+                        new Claim(OpenIddictConstants.Claims.Email, principal.FindFirstValue(ClaimTypes.Email))
+                            .SetDestinations(OpenIddictConstants.Destinations.AccessToken, OpenIddictConstants.Destinations.IdentityToken),
+                        new Claim("prv", "microsoft")
                             .SetDestinations(OpenIddictConstants.Destinations.AccessToken, OpenIddictConstants.Destinations.IdentityToken)
                     },
                 _ => throw new InvalidOperationException("Unknown provider"),
