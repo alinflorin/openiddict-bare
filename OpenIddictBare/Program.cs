@@ -96,6 +96,7 @@ builder.Services.AddOpenIddict()
         options.AllowAuthorizationCodeFlow().RequireProofKeyForCodeExchange();
         options.SetAuthorizationEndpointUris("/connect/authorize")
                 .SetUserinfoEndpointUris("/connect/userinfo")
+                .SetIntrospectionEndpointUris("/connect/introspect")
                .SetTokenEndpointUris("/connect/token");
         options.AllowClientCredentialsFlow();
         options.AllowRefreshTokenFlow();
