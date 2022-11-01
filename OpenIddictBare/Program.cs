@@ -115,6 +115,7 @@ builder.Services.AddOpenIddict()
     });
 
 builder.Services.AddHostedService<OpenIddictHostedService>();
+builder.Services.AddCors();
 
 if (builder.Configuration.GetValue("OpenTelemetry:Enabled", false))
 {
@@ -145,6 +146,13 @@ if (builder.Configuration.GetValue("OpenTelemetry:Enabled", false))
 }
 
 var app = builder.Build();
+
+app.UseCors(o => {
+    o.AllowAnyHeader();
+    o.AllowAnyMethod();
+    o.AllowAnyOrigin();
+    o.AllowCredentials();
+});
 
 var forwardingOptions = new ForwardedHeadersOptions()
 {
