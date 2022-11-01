@@ -52,11 +52,15 @@ namespace OpenIddictBare.Controllers
             else if (request.IsAuthorizationCodeGrantType())
             {
                 claimsPrincipal = (await HttpContext.AuthenticateAsync(OpenIddictServerAspNetCoreDefaults.AuthenticationScheme)).Principal;
+                claimsPrincipal.SetAudiences(request.ClientId);
+                claimsPrincipal.SetScopes(request.GetScopes());
             }
 
             else if (request.IsRefreshTokenGrantType())
             {
                 claimsPrincipal = (await HttpContext.AuthenticateAsync(OpenIddictServerAspNetCoreDefaults.AuthenticationScheme)).Principal;
+                claimsPrincipal.SetAudiences(request.ClientId);
+                claimsPrincipal.SetScopes(request.GetScopes());
             }
             else
             {
