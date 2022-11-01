@@ -23,9 +23,9 @@ namespace OpenIddictBare.Controllers
             var claimsPrincipal = (await HttpContext.AuthenticateAsync(OpenIddictServerAspNetCoreDefaults.AuthenticationScheme)).Principal;
 
             return Ok(new {
-                Name = claimsPrincipal.FindFirstValue(ClaimTypes.Name),
-                Email = claimsPrincipal.FindFirstValue(ClaimTypes.Email),
-                Sub = claimsPrincipal.FindFirstValue(ClaimTypes.Email)
+                Name = claimsPrincipal.FindFirstValue(OpenIddictConstants.Claims.Name),
+                Email = claimsPrincipal.FindFirstValue(OpenIddictConstants.Claims.Email),
+                Sub = claimsPrincipal.FindFirstValue(OpenIddictConstants.Claims.Email)
             });
         }
 
