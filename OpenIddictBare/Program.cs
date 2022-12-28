@@ -1,7 +1,9 @@
+using System.Security.Cryptography.X509Certificates;
 using dotenv.net;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.HttpOverrides;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.IdentityModel.Tokens;
 using OpenIddictBare;
 using OpenIddictBare.Models;
 using OpenTelemetry;
@@ -92,7 +94,10 @@ builder.Services.AddOpenIddict()
     .AddServer(options =>
     {
         options.SetIssuer(new Uri(builder.Configuration["Issuer"]));
-        options.AddEphemeralEncryptionKey().AddEphemeralSigningKey();
+
+        options.AddSigningCertificate(X509Certificate2.CreateFromPem(builder.Configuration["Certs:Signing"]));
+        options.AddEncryptionCertificate(X509Certificate2.CreateFromPem(builder.Configuration["Certs:Encryption"]));
+
         options.AllowAuthorizationCodeFlow().RequireProofKeyForCodeExchange();
         options.SetAuthorizationEndpointUris("/connect/authorize")
                 .SetUserinfoEndpointUris("/connect/userinfo")
