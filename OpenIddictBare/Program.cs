@@ -1,3 +1,4 @@
+using System.Security.Cryptography;
 using System.Security.Cryptography.X509Certificates;
 using dotenv.net;
 using Microsoft.AspNetCore.Authentication.Cookies;
@@ -95,8 +96,18 @@ builder.Services.AddOpenIddict()
     {
         options.SetIssuer(new Uri(builder.Configuration["Issuer"]));
 
-        options.AddSigningCertificate(X509Certificate2.CreateFromPem(builder.Configuration["Certs:Signing"]));
-        options.AddEncryptionCertificate(X509Certificate2.CreateFromPem(builder.Configuration["Certs:Encryption"]));
+        var signingCert = X509Certificate2.CreateFromPem(builder.Configuration["Certs:SigningCrt"]);
+        var signingKey = RSA.Create();
+        signingKey.ImportFromPem(builder.Configuration["Certs:SigningKey"]);
+        signingCert = signingCert.CopyWithPrivateKey(signingKey);
+        options.AddSigningCertificate(signingCert);
+
+        var encryptionCert = X509Certificate2.CreateFromPem(builder.Configuration["Certs:EncryptionCrt"]);
+        var encryptionKey = RSA.Create();
+        encryptionKey.ImportFromPem(builder.Configuration["Certs:EncryptionKey"]);
+        encryptionCert = encryptionCert.CopyWithPrivateKey(encryptionKey);
+        options.AddEncryptionCertificate(encryptionCert);
+
 
         options.AllowAuthorizationCodeFlow().RequireProofKeyForCodeExchange();
         options.SetAuthorizationEndpointUris("/connect/authorize")
